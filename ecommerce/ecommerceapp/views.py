@@ -8,6 +8,7 @@ MERCHANT_KEY=keys.MK
 import json
 from django.views.decorators.csrf import  csrf_exempt
 from PayTm import Checksum
+from pathlib import Path
 
 # Create your views here.
 def index(request):
@@ -123,24 +124,53 @@ def handlerequest(request):
     return render(request, 'paymentstatus.html', {'response': response_dict})
 
 
+# def profile(request):
+#     if not request.user.is_authenticated:
+#         messages.warning(request,"Login & Try Again")
+#         return redirect('/auth/login')
+#     currentuser=request.user.username
+#     items=Orders.objects.filter(email=currentuser)
+#     rid=""
+#     for i in items:
+#         print(i.oid)
+#         # print(i.order_id)
+#         myid=i.oid
+#         rid=myid.replace("ShopyCart","")
+#         print(rid)
+#     status=OrderUpdate.objects.filter(order_id=int(rid))
+#     for j in status:
+#         print(j.update_desc)
+
+   
+#     context ={"items":items,"status":status}
+#     # print(currentuser)
+#     return render(request,"profile.html",context)
+
 def profile(request):
     if not request.user.is_authenticated:
-        messages.warning(request,"Login & Try Again")
+        messages.warning(request, "Login & Try Again")
         return redirect('/auth/login')
-    currentuser=request.user.username
-    items=Orders.objects.filter(email=currentuser)
-    rid=""
+
+    currentuser = request.user.username
+    items = Orders.objects.filter(email=currentuser)
+    rid = ""
+
     for i in items:
         print(i.oid)
-        # print(i.order_id)
-        myid=i.oid
-        rid=myid.replace("ShopyCart","")
+        myid = i.oid
+        rid = myid.replace("ShopyCart", "")
         print(rid)
-    status=OrderUpdate.objects.filter(order_id=int(rid))
+
+        # Additional validation for rid
+        if not rid.isdigit():
+            # Handle the case where rid is not a valid integer
+            # For example, display a message or set a default value
+            rid = None
+
+    status = OrderUpdate.objects.filter(order_id=int(rid)) if rid else []
+
     for j in status:
         print(j.update_desc)
 
-   
-    context ={"items":items,"status":status}
-    # print(currentuser)
-    return render(request,"profile.html",context)
+    context = {"items": items, "status": status}
+    return render(request, "profile.html", context)
